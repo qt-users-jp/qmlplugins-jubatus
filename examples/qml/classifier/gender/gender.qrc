@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>gender.qml</file>
+        <file>Selector.qml</file>
+        <file>Button.qml</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,3 @@
+module QtJubatus
+plugin declarative_jubatus
+typeinfo plugins.qmltypes

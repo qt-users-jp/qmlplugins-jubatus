@@ -1,0 +1,66 @@
+import QtQuick.tooling 1.1
+
+// This file describes the plugin-supplied types contained in the library.
+// It is used for QML tooling purposes only.
+//
+// This file was auto-generated with the command '/home/tasuku/org/qt-project/qt5/5.1.0-beta1/5.1.0-beta1/gcc_64/bin/qmlplugindump QtJubatus 0.1'.
+
+Module {
+    Component {
+        name: "QJubatusClassifier"
+        prototype: "QObject"
+        Property { name: "host"; type: "string" }
+        Property { name: "port"; type: "int" }
+        Property { name: "timeout"; type: "double" }
+        Signal {
+            name: "hostChanged"
+            Parameter { name: "host"; type: "string" }
+        }
+        Signal {
+            name: "portChanged"
+            Parameter { name: "port"; type: "int" }
+        }
+        Signal {
+            name: "timeoutChanged"
+            Parameter { name: "timeout"; type: "double" }
+        }
+        Method {
+            name: "setHost"
+            Parameter { name: "host"; type: "string" }
+        }
+        Method {
+            name: "setPort"
+            Parameter { name: "port"; type: "int" }
+        }
+        Method {
+            name: "setTimeout"
+            Parameter { name: "timeout"; type: "double" }
+        }
+    }
+    Component {
+        name: "QmlJubatusClassifier"
+        prototype: "QJubatusClassifier"
+        exports: ["Classifier 0.1"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "name"; type: "string" }
+        Method {
+            name: "train"
+            Parameter { name: "data"; type: "QVariantList" }
+        }
+        Method {
+            name: "train"
+            Parameter { name: "label"; type: "string" }
+            Parameter { name: "data"; type: "QVariantMap" }
+        }
+        Method {
+            name: "classify"
+            type: "QVariantList"
+            Parameter { name: "data"; type: "QVariantList" }
+        }
+        Method {
+            name: "classify"
+            type: "QVariantList"
+            Parameter { name: "data"; type: "QVariantMap" }
+        }
+    }
+}
