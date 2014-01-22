@@ -33,9 +33,14 @@
 #include "jubatus_global.h"
 
 namespace jubatus {
+    namespace client {
+        namespace common {
+            struct datum;
+        }
+    }
     namespace classifier {
-        struct datum;
         struct estimate_result;
+        struct labeled_datum;
     }
 }
 
@@ -44,12 +49,14 @@ class JUBATUS_EXPORT QJubatusClassifier : public QObject
     Q_OBJECT
     Q_PROPERTY(QString host READ host WRITE setHost NOTIFY hostChanged)
     Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(double timeout READ timeout WRITE setTimeout NOTIFY timeoutChanged)
 public:
     explicit QJubatusClassifier(QObject *parent = 0);
 
     const QString &host() const;
     int port() const;
+    const QString &name() const;
     double timeout() const;
 
     struct EstimateResult {
@@ -59,23 +66,25 @@ public:
 
     typedef QPair<QString, QVariantMap> TrainData;
 
-    void train(const QString &name, const QList<QJubatusClassifier::TrainData> &data);
-    QList<QList<QJubatusClassifier::EstimateResult>> classify(const QString &name, const QList<QVariantMap> &data);
+    void train(const QList<QJubatusClassifier::TrainData> &data);
+    QList<QList<QJubatusClassifier::EstimateResult>> classify(const QList<QVariantMap> &data);
 
 public slots:
     void setHost(const QString &host);
     void setPort(int port);
+    void setName(const QString &name);
     void setTimeout(double timeout);
 
 signals:
     void hostChanged(const QString &host);
     void portChanged(int port);
+    void nameChanged(const QString &name);
     void timeoutChanged(double timeout);
 
 protected:
-    void train(const std::string &name, const std::vector<std::pair<std::string, jubatus::classifier::datum>> &data);
-    std::vector<std::vector<jubatus::classifier::estimate_result>> classify(const std::string &name, const std::vector<jubatus::classifier::datum> &data);
-    static jubatus::classifier::datum convert(const QVariantMap &data);
+    void train(const std::vector<jubatus::classifier::labeled_datum> &data);
+    std::vector<std::vector<jubatus::classifier::estimate_result>> classify(const std::vector<jubatus::client::common::datum> &data);
+    static jubatus::client::common::datum convert(const QVariantMap &data);
 
 private:
     class Private;

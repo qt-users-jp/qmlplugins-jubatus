@@ -51,23 +51,25 @@ Widget::Widget(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::Widget)
 {
+    classifier.setTimeout(10.0);
+    classifier.setName(QStringLiteral("test"));
     ui->setupUi(this);
 
     connect(ui->male, &QPushButton::clicked, [&] {
-        classifier.train(QStringLiteral("test"), makeTrainData(QStringLiteral("male"), ui));
+        classifier.train(makeTrainData(QStringLiteral("male"), ui));
     });
 
     connect(ui->female, &QPushButton::clicked, [&] {
-        classifier.train(QStringLiteral("test"), makeTrainData(QStringLiteral("female"), ui));
+        classifier.train(makeTrainData(QStringLiteral("female"), ui));
     });
 
     connect(ui->other, &QPushButton::clicked, [&] {
-        classifier.train(QStringLiteral("test"), makeTrainData(QStringLiteral("other"), ui));
+        classifier.train(makeTrainData(QStringLiteral("other"), ui));
     });
 
     connect(ui->classify, &QPushButton::clicked, [&] {
         QStringList text;
-        QList<QList<QJubatusClassifier::EstimateResult>> results = classifier.classify(QStringLiteral("test"), QList<QVariantMap>() << makeDatum(ui));
+        QList<QList<QJubatusClassifier::EstimateResult>> results = classifier.classify(QList<QVariantMap>() << makeDatum(ui));
         foreach (const QList<QJubatusClassifier::EstimateResult> &result, results) {
             foreach (const QJubatusClassifier::EstimateResult &r, result) {
                 text.append(QString("%1\t%2").arg(r.label).arg(r.score));

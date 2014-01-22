@@ -47,6 +47,7 @@ public:
 
     QString host;
     int port;
+    QString name;
     double timeout;
 };
 
@@ -55,6 +56,7 @@ QJubatusClassifier::Private::Private(QJubatusClassifier *parent)
     , client(0)
     , host(QStringLiteral("localhost"))
     , port(9199)
+    , name(QStringLiteral("classifier"))
     , timeout(1.0)
 {
 }
@@ -69,6 +71,11 @@ QJubatusClassifier::QJubatusClassifier(QObject *parent)
     , d(new Private(this))
 {
     connect(this, &QJubatusClassifier::destroyed, [this](){ delete d; });
+    auto deleteClient = [this]() { delete d->client; d->client = 0; };
+    connect(this, &QJubatusClassifier::hostChanged, deleteClient);
+    connect(this, &QJubatusClassifier::portChanged, deleteClient);
+    connect(this, &QJubatusClassifier::nameChanged, deleteClient);
+    connect(this, &QJubatusClassifier::timeoutChanged, deleteClient);
 }
 
 const QString &QJubatusClassifier::host() const
@@ -95,6 +102,18 @@ void QJubatusClassifier::setPort(int port)
     emit portChanged(port);
 }
 
+const QString &QJubatusClassifier::name() const
+{
+    return d->name;
+}
+
+void QJubatusClassifier::setName(const QString &name)
+{
+    if (d->name == name) return;
+    d->name = name;
+    emit nameChanged(name);
+}
+
 double QJubatusClassifier::timeout() const
 {
     return d->timeout;
@@ -107,9 +126,9 @@ void QJubatusClassifier::setTimeout(double timeout)
     emit timeoutChanged(timeout);
 }
 
-jubatus::classifier::datum QJubatusClassifier::convert(const QVariantMap &data)
+jubatus::client::common::datum QJubatusClassifier::convert(const QVariantMap &data)
 {
-    jubatus::classifier::datum ret;
+    jubatus::client::common::datum ret;
 
     foreach (const QString &key, data.keys()) {
         QVariant value = data.value(key);
@@ -132,31 +151,33 @@ jubatus::classifier::datum QJubatusClassifier::convert(const QVariantMap &data)
     return ret;
 }
 
-void QJubatusClassifier::train(const QString &name, const QList<QJubatusClassifier::TrainData> &data)
+void QJubatusClassifier::train(const QList<QJubatusClassifier::TrainData> &data)
 {
-    std::vector<std::pair<std::string, jubatus::classifier::datum>> train_data;
+    std::vector<jubatus::classifier::labeled_datum> train_data;
     foreach (const TrainData &v, data) {
-        train_data.push_back(make_pair(v.first.toStdString(), convert(v.second)));
+        train_data.push_back(jubatus::classifier::labeled_datum(v.first.toStdString(), convert(v.second)));
     }
-    train(name.toStdString(), train_data);
+    train(train_data);
 }
 
-void QJubatusClassifier::train(const std::string &name, const std::vector<std::pair<std::string, jubatus::classifier::datum>> &data)
+void QJubatusClassifier::train(const std::vector<jubatus::classifier::labeled_datum> &data)
 {
-    jubatus::classifier::client::classifier client(d->host.toStdString(), d->port, d->timeout);
-    client.train(name, data);
+    if (!d->client) {
+        d->client = new jubatus::classifier::client::classifier(d->host.toStdString(), d->port, d->name.toStdString(), d->timeout);
+    }
+    d->client->train(data);
 }
 
-QList<QList<QJubatusClassifier::EstimateResult>> QJubatusClassifier::classify(const QString &name, const QList<QVariantMap> &data)
+QList<QList<QJubatusClassifier::EstimateResult>> QJubatusClassifier::classify(const QList<QVariantMap> &data)
 {
     QList<QList<EstimateResult>> ret;
 
-    std::vector<jubatus::classifier::datum> test_data;
+    std::vector<jubatus::client::common::datum> test_data;
     foreach (const QVariant &v, data) {
         test_data.push_back(convert(v.toMap()));
     }
 
-    std::vector<std::vector<jubatus::classifier::estimate_result> > results = classify(name.toStdString(), test_data);
+    std::vector<std::vector<jubatus::classifier::estimate_result> > results = classify(test_data);
 
     for (size_t i = 0; i < results.size(); ++i) {
         QList<EstimateResult> list;
@@ -172,10 +193,12 @@ QList<QList<QJubatusClassifier::EstimateResult>> QJubatusClassifier::classify(co
     return ret;
 }
 
-std::vector<std::vector<jubatus::classifier::estimate_result>> QJubatusClassifier::classify(const std::string &name, const std::vector<jubatus::classifier::datum> &data)
+std::vector<std::vector<jubatus::classifier::estimate_result>> QJubatusClassifier::classify(const std::vector<jubatus::client::common::datum> &data)
 {
-    jubatus::classifier::client::classifier client(d->host.toStdString(), d->port, d->timeout);
-    return client.classify(name, data);
+    if (!d->client) {
+        d->client = new jubatus::classifier::client::classifier(d->host.toStdString(), d->port, d->name.toStdString(), d->timeout);
+    }
+    return d->client->classify(data);
 }
 
 

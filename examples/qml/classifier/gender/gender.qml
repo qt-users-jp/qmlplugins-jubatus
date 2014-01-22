@@ -141,5 +141,6 @@ Rectangle {
     Jubatus.Classifier {
         id: classifier
         name: 'test'
+        timeout: 10.0
     }
 }
