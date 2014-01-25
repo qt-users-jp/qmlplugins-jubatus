@@ -1,5 +1,3 @@
-CONFIG += exceptions
-
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 

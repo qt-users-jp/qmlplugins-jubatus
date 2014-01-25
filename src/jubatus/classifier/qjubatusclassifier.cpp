@@ -28,36 +28,21 @@
 
 #include <QtCore/QDebug>
 
-#include <string>
 #include <vector>
 
-#include <jubatus/client.hpp>
+#include <jubatus/client/classifier_client.hpp>
 
 class QJubatusClassifier::Private
 {
 public:
-    Private(QJubatusClassifier *parent);
+    Private();
     ~Private();
 
-private:
-    QJubatusClassifier *q;
-
-public:
     jubatus::classifier::client::classifier *client;
-
-    QString host;
-    int port;
-    QString name;
-    double timeout;
 };
 
-QJubatusClassifier::Private::Private(QJubatusClassifier *parent)
-    : q(parent)
-    , client(0)
-    , host(QStringLiteral("localhost"))
-    , port(9199)
-    , name(QStringLiteral("classifier"))
-    , timeout(1.0)
+QJubatusClassifier::Private::Private()
+    : client(0)
 {
 }
 
@@ -67,8 +52,8 @@ QJubatusClassifier::Private::~Private()
 }
 
 QJubatusClassifier::QJubatusClassifier(QObject *parent)
-    : QObject(parent)
-    , d(new Private(this))
+    : QJubatusClient(parent)
+    , d(new Private)
 {
     connect(this, &QJubatusClassifier::destroyed, [this](){ delete d; });
     auto deleteClient = [this]() { delete d->client; d->client = 0; };
@@ -76,79 +61,6 @@ QJubatusClassifier::QJubatusClassifier(QObject *parent)
     connect(this, &QJubatusClassifier::portChanged, deleteClient);
     connect(this, &QJubatusClassifier::nameChanged, deleteClient);
     connect(this, &QJubatusClassifier::timeoutChanged, deleteClient);
-}
-
-const QString &QJubatusClassifier::host() const
-{
-    return d->host;
-}
-
-void QJubatusClassifier::setHost(const QString &host)
-{
-    if (d->host == host) return;
-    d->host = host;
-    emit hostChanged(host);
-}
-
-int QJubatusClassifier::port() const
-{
-    return d->port;
-}
-
-void QJubatusClassifier::setPort(int port)
-{
-    if (d->port == port) return;
-    d->port = port;
-    emit portChanged(port);
-}
-
-const QString &QJubatusClassifier::name() const
-{
-    return d->name;
-}
-
-void QJubatusClassifier::setName(const QString &name)
-{
-    if (d->name == name) return;
-    d->name = name;
-    emit nameChanged(name);
-}
-
-double QJubatusClassifier::timeout() const
-{
-    return d->timeout;
-}
-
-void QJubatusClassifier::setTimeout(double timeout)
-{
-    if (d->timeout == timeout) return;
-    d->timeout = timeout;
-    emit timeoutChanged(timeout);
-}
-
-jubatus::client::common::datum QJubatusClassifier::convert(const QVariantMap &data)
-{
-    jubatus::client::common::datum ret;
-
-    foreach (const QString &key, data.keys()) {
-        QVariant value = data.value(key);
-        switch (value.type()) {
-        case QVariant::String:
-            ret.string_values.push_back(make_pair(key.toStdString(), value.toString().toStdString()));
-            break;
-        case QVariant::Int:
-            ret.num_values.push_back(make_pair(key.toStdString(), value.toInt()));
-            break;
-        case QVariant::Double:
-            ret.num_values.push_back(make_pair(key.toStdString(), value.toDouble()));
-            break;
-        default:
-            qDebug() << Q_FUNC_INFO << __LINE__ << value << "not supported.";
-            break;
-        }
-    }
-
-    return ret;
 }
 
 void QJubatusClassifier::train(const QList<QJubatusClassifier::TrainData> &data)
@@ -163,7 +75,7 @@ void QJubatusClassifier::train(const QList<QJubatusClassifier::TrainData> &data)
 void QJubatusClassifier::train(const std::vector<jubatus::classifier::labeled_datum> &data)
 {
     if (!d->client) {
-        d->client = new jubatus::classifier::client::classifier(d->host.toStdString(), d->port, d->name.toStdString(), d->timeout);
+        d->client = new jubatus::classifier::client::classifier(host().toStdString(), port(), name().toStdString(), timeout());
     }
     d->client->train(data);
 }
@@ -196,7 +108,7 @@ QList<QList<QJubatusClassifier::EstimateResult>> QJubatusClassifier::classify(co
 std::vector<std::vector<jubatus::classifier::estimate_result>> QJubatusClassifier::classify(const std::vector<jubatus::client::common::datum> &data)
 {
     if (!d->client) {
-        d->client = new jubatus::classifier::client::classifier(d->host.toStdString(), d->port, d->name.toStdString(), d->timeout);
+        d->client = new jubatus::classifier::client::classifier(host().toStdString(), port(), name().toStdString(), timeout());
     }
     return d->client->classify(data);
 }

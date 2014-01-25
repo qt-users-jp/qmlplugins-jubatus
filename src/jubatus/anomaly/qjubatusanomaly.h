@@ -24,45 +24,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef QJUBATUSCLASSIFIER_H
-#define QJUBATUSCLASSIFIER_H
+#ifndef QJUBATUSANOMALY_H
+#define QJUBATUSANOMALY_H
 
 #include "jubatus_global.h"
 #include "qjubatusclient.h"
 
 #include <QtCore/QVariant>
 
-
 namespace jubatus {
-    namespace classifier {
-        struct estimate_result;
-        struct labeled_datum;
+    namespace anomaly {
+        struct id_with_score;
     }
 }
 
-class JUBATUS_EXPORT QJubatusClassifier : public QJubatusClient
+class JUBATUS_EXPORT QJubatusAnomaly : public QJubatusClient
 {
     Q_OBJECT
 public:
-    explicit QJubatusClassifier(QObject *parent = 0);
+    explicit QJubatusAnomaly(QObject *parent = 0);
 
-    struct EstimateResult {
-        QString label;
-        double score;
+    struct IdAndScore {
+        QString id;
+        float score;
     };
 
-    typedef QPair<QString, QVariantMap> TrainData;
-
-    void train(const QList<QJubatusClassifier::TrainData> &data);
-    QList<QList<QJubatusClassifier::EstimateResult>> classify(const QList<QVariantMap> &data);
-
-protected:
-    void train(const std::vector<jubatus::classifier::labeled_datum> &data);
-    std::vector<std::vector<jubatus::classifier::estimate_result>> classify(const std::vector<jubatus::client::common::datum> &data);
+    bool clearRow(const QString &id);
+    IdAndScore add(const QVariantMap &data);
+    float update(const QString &id, const QVariantMap &data);
+    float overwrite(const QString &id, const QVariantMap &data);
+    float calcScore(const QVariantMap &data);
+    QStringList getAllRows();
 
 private:
     class Private;
     Private *d;
 };
 
-#endif // QJUBATUSCLASSIFIER_H
+#endif // QJUBATUSANOMALY_H
