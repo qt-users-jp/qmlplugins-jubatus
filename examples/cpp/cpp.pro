@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS += anomaly classifier
+SUBDIRS += anomaly classifier recommender

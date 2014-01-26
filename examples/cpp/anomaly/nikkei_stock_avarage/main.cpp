@@ -15,6 +15,7 @@ protected:
 private:
     QNetworkAccessManager manager;
     struct Data {
+        Data() : first(0), last(0), score(0) {}
         float first;
         float last;
         float score;
@@ -28,7 +29,9 @@ Graph::Graph(QWidget *parent)
 {
     QObject::connect(&manager, &QNetworkAccessManager::finished, [this](QNetworkReply *reply) {
         QJubatusAnomaly anomaly;
-        anomaly.setTimeout(60);
+        bool hasError = false;
+        connect(&anomaly, &QJubatusAnomaly::error, [&hasError](const QString &message) { hasError = true; });
+
         QStringList lines = QTextCodec::codecForName("Shift-JIS")->toUnicode(reply->readAll()).split(QStringLiteral("\r\n"));
         foreach (const QString &line, lines) {
             QStringList columns = line.split(QStringLiteral(","));
@@ -46,8 +49,10 @@ Graph::Graph(QWidget *parent)
                 params.insert("first", d.first * 100);
                 params.insert("last", d.last * 100);
                 params.insert("diff", (d.last - d.first) * 100);
-                QJubatusAnomaly::IdAndScore ret = anomaly.add(params);
-                d.score = ret.score;
+                if (!hasError) {
+                    QJubatusAnomaly::IdAndScore ret = anomaly.add(params);
+                    d.score = ret.score;
+                }
                 data.append(d);
             }
         }

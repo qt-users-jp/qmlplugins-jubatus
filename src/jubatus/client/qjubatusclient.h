@@ -36,6 +36,7 @@ namespace jubatus {
     namespace client {
         namespace common {
             struct datum;
+            class client;
         }
     }
 }
@@ -67,12 +68,50 @@ signals:
     void nameChanged(const QString &name);
     void timeoutChanged(double timeout);
 
+    void error(const QString &message);
+
 protected:
+    template <class T>
+    T *client() {
+        if (!m_client) {
+            m_client = new T(convert(host()), port(), convert(name()), timeout());
+        }
+        return static_cast<T *>(m_client);
+    }
+
+    std::string convert(const QString &data) const;
+    QString convert(const std::string &data) const;
+    std::vector<std::string> convert(const QStringList &data) const;
+    QStringList convert(const std::vector<std::string> &data) const;
     jubatus::client::common::datum convert(const QVariantMap &data) const;
+    QVariantMap convert(const jubatus::client::common::datum &data) const;
+    std::vector<jubatus::client::common::datum> convert(const QList<QVariantMap> &data) const;
+    QList<QVariantMap> convert(const std::vector<jubatus::client::common::datum> &data) const;
 
 private:
     class Private;
     Private *d;
+
+    jubatus::client::common::client *m_client;
 };
+
+#define EXEC_JUBATUS_COMMAND(COMMAND) \
+    try { \
+        for (int i = 0; i < 3; i++) { \
+            try { \
+                COMMAND; \
+                break; \
+            } catch (msgpack::rpc::connection_closed_error &e) { \
+                client()->get_client().close(); \
+            } catch (msgpack::rpc::system_error &e) { \
+                client()->get_client().close(); \
+            } catch (msgpack::rpc::timeout_error &e) { \
+                client()->get_client().close(); \
+            } \
+            ::sleep(1); \
+        } \
+    } catch(msgpack::rpc::rpc_error &e) { \
+        emit error(QString::fromUtf8(e.what())); \
+    }
 
 #endif // QJUBATUSCLIENT_H

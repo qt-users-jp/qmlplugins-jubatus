@@ -32,85 +32,67 @@
 
 #include <jubatus/client/classifier_client.hpp>
 
-class QJubatusClassifier::Private
-{
-public:
-    Private();
-    ~Private();
-
-    jubatus::classifier::client::classifier *client;
-};
-
-QJubatusClassifier::Private::Private()
-    : client(0)
-{
-}
-
-QJubatusClassifier::Private::~Private()
-{
-    delete client;
-}
-
 QJubatusClassifier::QJubatusClassifier(QObject *parent)
     : QJubatusClient(parent)
-    , d(new Private)
 {
-    connect(this, &QJubatusClassifier::destroyed, [this](){ delete d; });
-    auto deleteClient = [this]() { delete d->client; d->client = 0; };
-    connect(this, &QJubatusClassifier::hostChanged, deleteClient);
-    connect(this, &QJubatusClassifier::portChanged, deleteClient);
-    connect(this, &QJubatusClassifier::nameChanged, deleteClient);
-    connect(this, &QJubatusClassifier::timeoutChanged, deleteClient);
 }
 
-void QJubatusClassifier::train(const QList<QJubatusClassifier::TrainData> &data)
+void QJubatusClassifier::train(const QList<QJubatusClassifier::LabeledDatum> &data)
 {
-    std::vector<jubatus::classifier::labeled_datum> train_data;
-    foreach (const TrainData &v, data) {
-        train_data.push_back(jubatus::classifier::labeled_datum(v.first.toStdString(), convert(v.second)));
-    }
-    train(train_data);
+    EXEC_JUBATUS_COMMAND( client()->train(convert(data)); )
 }
 
-void QJubatusClassifier::train(const std::vector<jubatus::classifier::labeled_datum> &data)
+QList<QList<QJubatusClassifier::EstimateResult> > QJubatusClassifier::classify(const QList<QVariantMap> &data)
 {
-    if (!d->client) {
-        d->client = new jubatus::classifier::client::classifier(host().toStdString(), port(), name().toStdString(), timeout());
-    }
-    d->client->train(data);
+    QList<QList<QJubatusClassifier::EstimateResult> > ret;
+    EXEC_JUBATUS_COMMAND( ret = convert(client()->classify(convert(data))); )
+    return ret;
 }
 
-QList<QList<QJubatusClassifier::EstimateResult>> QJubatusClassifier::classify(const QList<QVariantMap> &data)
+jubatus::classifier::labeled_datum QJubatusClassifier::convert(const QJubatusClassifier::LabeledDatum &data) const
 {
-    QList<QList<EstimateResult>> ret;
+    jubatus::classifier::labeled_datum ret;
+    ret.label = convert(data.label);
+    ret.data = convert(data.data);
+    return ret;
+}
 
-    std::vector<jubatus::client::common::datum> test_data;
-    foreach (const QVariant &v, data) {
-        test_data.push_back(convert(v.toMap()));
-    }
-
-    std::vector<std::vector<jubatus::classifier::estimate_result> > results = classify(test_data);
-
-    for (size_t i = 0; i < results.size(); ++i) {
-        QList<EstimateResult> list;
-        for (size_t j = 0; j < results[i].size(); ++j) {
-            const jubatus::classifier::estimate_result& jr = results[i][j];
-            EstimateResult qr;
-            qr.label = QString::fromStdString(jr.label);
-            qr.score = jr.score;
-            list.append(qr);
-        }
-        ret.append(list);
+std::vector<jubatus::classifier::labeled_datum> QJubatusClassifier::convert(const QList<QJubatusClassifier::LabeledDatum> &data) const
+{
+    std::vector<jubatus::classifier::labeled_datum> ret;
+    foreach (const QJubatusClassifier::LabeledDatum &datum, data) {
+        ret.push_back(convert(datum));
     }
     return ret;
 }
 
-std::vector<std::vector<jubatus::classifier::estimate_result>> QJubatusClassifier::classify(const std::vector<jubatus::client::common::datum> &data)
+QJubatusClassifier::EstimateResult QJubatusClassifier::convert(const jubatus::classifier::estimate_result &data) const
 {
-    if (!d->client) {
-        d->client = new jubatus::classifier::client::classifier(host().toStdString(), port(), name().toStdString(), timeout());
-    }
-    return d->client->classify(data);
+    QJubatusClassifier::EstimateResult ret;
+    ret.label = convert(data.label);
+    ret.score = data.score;
+    return ret;
 }
 
+QList<QJubatusClassifier::EstimateResult> QJubatusClassifier::convert(const std::vector<jubatus::classifier::estimate_result> &data) const
+{
+    QList<QJubatusClassifier::EstimateResult> ret;
+    for (auto it = data.begin(); it != data.end(); ++it) {
+        ret.append(convert(*it));
+    }
+    return ret;
+}
 
+QList<QList<QJubatusClassifier::EstimateResult>> QJubatusClassifier::convert(const std::vector<std::vector<jubatus::classifier::estimate_result>> &data) const
+{
+    QList<QList<QJubatusClassifier::EstimateResult>> ret;
+    for (auto it = data.begin(); it != data.end(); ++it) {
+        ret.append(convert(*it));
+    }
+    return ret;
+}
+
+jubatus::classifier::client::classifier *QJubatusClassifier::client()
+{
+    return QJubatusClient::client<jubatus::classifier::client::classifier>();
+}

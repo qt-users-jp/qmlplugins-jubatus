@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS += classifier
+SUBDIRS += classifier recommender
 

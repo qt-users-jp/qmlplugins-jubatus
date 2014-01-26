@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>baseball.csv</file>
+        <file>npb_similar_player.qml</file>
+    </qresource>
+</RCC>

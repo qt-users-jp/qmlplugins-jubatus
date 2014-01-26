@@ -32,89 +32,70 @@
 
 #include <jubatus/client/anomaly_client.hpp>
 
-class QJubatusAnomaly::Private
-{
-public:
-    Private();
-    ~Private();
-
-    jubatus::anomaly::client::anomaly *client;
-};
-
-QJubatusAnomaly::Private::Private()
-    : client(0)
-{
-}
-
-QJubatusAnomaly::Private::~Private()
-{
-    delete client;
-}
-
 QJubatusAnomaly::QJubatusAnomaly(QObject *parent)
     : QJubatusClient(parent)
-    , d(new Private)
 {
-    connect(this, &QJubatusAnomaly::destroyed, [this](){ delete d; });
-    auto deleteClient = [this]() { delete d->client; d->client = 0; };
-    connect(this, &QJubatusAnomaly::hostChanged, deleteClient);
-    connect(this, &QJubatusAnomaly::portChanged, deleteClient);
-    connect(this, &QJubatusAnomaly::nameChanged, deleteClient);
-    connect(this, &QJubatusAnomaly::timeoutChanged, deleteClient);
 }
 
 bool QJubatusAnomaly::clearRow(const QString &id)
 {
-    if (!d->client) {
-        d->client = new jubatus::anomaly::client::anomaly(host().toStdString(), port(), name().toStdString(), timeout());
-    }
-    return d->client->clear_row(id.toStdString());
+    bool ret = false;
+    EXEC_JUBATUS_COMMAND( ret = client()->clear_row(convert(id)); )
+    return ret;
 }
 
 QJubatusAnomaly::IdAndScore QJubatusAnomaly::add(const QVariantMap &data)
 {
-    if (!d->client) {
-        d->client = new jubatus::anomaly::client::anomaly(host().toStdString(), port(), name().toStdString(), timeout());
-    }
-    jubatus::anomaly::id_with_score id_with_score = d->client->add(convert(data));
-    IdAndScore ret;
-    ret.id = QString::fromStdString(id_with_score.id);
-    ret.score = id_with_score.score;
+    QJubatusAnomaly::IdAndScore ret;
+    EXEC_JUBATUS_COMMAND( ret = convert(client()->add(convert(data))); )
     return ret;
 }
 
 float QJubatusAnomaly::update(const QString &id, const QVariantMap &data)
 {
-    if (!d->client) {
-        d->client = new jubatus::anomaly::client::anomaly(host().toStdString(), port(), name().toStdString(), timeout());
-    }
-    return d->client->update(id.toStdString(), convert(data));
+    float ret = 0.0;
+    EXEC_JUBATUS_COMMAND( ret = client()->update(convert(id), convert(data)); )
+    return ret;
 }
 
 float QJubatusAnomaly::overwrite(const QString &id, const QVariantMap &data)
 {
-    if (!d->client) {
-        d->client = new jubatus::anomaly::client::anomaly(host().toStdString(), port(), name().toStdString(), timeout());
-    }
-    return d->client->overwrite(id.toStdString(), convert(data));
+    float ret = 0.0;
+    EXEC_JUBATUS_COMMAND( client()->overwrite(convert(id), convert(data)); )
+    return ret;
 }
 
 float QJubatusAnomaly::calcScore(const QVariantMap &data)
 {
-    if (!d->client) {
-        d->client = new jubatus::anomaly::client::anomaly(host().toStdString(), port(), name().toStdString(), timeout());
-    }
-    return d->client->calc_score(convert(data));
+    float ret = 0.0;
+    EXEC_JUBATUS_COMMAND( ret = client()->calc_score(convert(data)); )
+    return ret;
 }
 
 QStringList QJubatusAnomaly::getAllRows()
 {
-    if (!d->client) {
-        d->client = new jubatus::anomaly::client::anomaly(host().toStdString(), port(), name().toStdString(), timeout());
-    }
     QStringList ret;
-    foreach (std::string id, d->client->get_all_rows())
-        ret.append(QString::fromStdString(id));
+    EXEC_JUBATUS_COMMAND( ret = convert(client()->get_all_rows()); )
     return ret;
 }
 
+jubatus::anomaly::id_with_score QJubatusAnomaly::convert(const QJubatusAnomaly::IdAndScore &data) const
+{
+    jubatus::anomaly::id_with_score ret;
+    ret.id = convert(data.id);
+    ret.score = data.score;
+    return ret;
+}
+
+QJubatusAnomaly::IdAndScore QJubatusAnomaly::convert(const jubatus::anomaly::id_with_score &data) const
+{
+    IdAndScore ret;
+    ret.id = convert(data.id);
+    ret.score = data.score;
+    return ret;
+}
+
+jubatus::anomaly::client::anomaly *QJubatusAnomaly::client()
+{
+    return QJubatusClient::client<jubatus::anomaly::client::anomaly>();
+}

@@ -37,6 +37,9 @@ namespace jubatus {
     namespace classifier {
         struct estimate_result;
         struct labeled_datum;
+        namespace client {
+            class classifier;
+        }
     }
 }
 
@@ -46,6 +49,11 @@ class JUBATUS_EXPORT QJubatusClassifier : public QJubatusClient
 public:
     explicit QJubatusClassifier(QObject *parent = 0);
 
+    struct LabeledDatum {
+        QString label;
+        QVariantMap data;
+    };
+
     struct EstimateResult {
         QString label;
         double score;
@@ -53,16 +61,19 @@ public:
 
     typedef QPair<QString, QVariantMap> TrainData;
 
-    void train(const QList<QJubatusClassifier::TrainData> &data);
-    QList<QList<QJubatusClassifier::EstimateResult>> classify(const QList<QVariantMap> &data);
+    Q_INVOKABLE void train(const QList<QJubatusClassifier::LabeledDatum> &data);
+    Q_INVOKABLE QList<QList<QJubatusClassifier::EstimateResult>> classify(const QList<QVariantMap> &data);
 
 protected:
-    void train(const std::vector<jubatus::classifier::labeled_datum> &data);
-    std::vector<std::vector<jubatus::classifier::estimate_result>> classify(const std::vector<jubatus::client::common::datum> &data);
+    using QJubatusClient::convert;
+    jubatus::classifier::labeled_datum convert(const QJubatusClassifier::LabeledDatum &data) const;
+    std::vector<jubatus::classifier::labeled_datum> convert(const QList<QJubatusClassifier::LabeledDatum> &data) const;
+    QJubatusClassifier::EstimateResult convert(const jubatus::classifier::estimate_result &data) const;
+    QList<QJubatusClassifier::EstimateResult> convert(const std::vector<jubatus::classifier::estimate_result> &data) const;
+    QList<QList<QJubatusClassifier::EstimateResult>> convert(const std::vector<std::vector<jubatus::classifier::estimate_result>> &data) const;
 
 private:
-    class Private;
-    Private *d;
+    jubatus::classifier::client::classifier *client();
 };
 
 #endif // QJUBATUSCLASSIFIER_H

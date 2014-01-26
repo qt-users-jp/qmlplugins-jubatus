@@ -24,8 +24,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef QJUBATUSANOMALY_H
-#define QJUBATUSANOMALY_H
+#ifndef QJUBATUSRECOMMENDER_H
+#define QJUBATUSRECOMMENDER_H
 
 #include "jubatus_global.h"
 #include "qjubatusclient.h"
@@ -33,40 +33,43 @@
 #include <QtCore/QVariant>
 
 namespace jubatus {
-    namespace anomaly {
+    namespace recommender {
         struct id_with_score;
         namespace client {
-            class anomaly;
+            class recommender;
         }
     }
 }
 
-class JUBATUS_EXPORT QJubatusAnomaly : public QJubatusClient
+class JUBATUS_EXPORT QJubatusRecommender : public QJubatusClient
 {
     Q_OBJECT
 public:
-    explicit QJubatusAnomaly(QObject *parent = 0);
+    explicit QJubatusRecommender(QObject *parent = 0);
 
-    struct IdAndScore {
-        IdAndScore() : score(0.0) {}
+    struct IdWithScore {
         QString id;
         float score;
     };
 
-    bool clearRow(const QString &id);
-    IdAndScore add(const QVariantMap &data);
-    float update(const QString &id, const QVariantMap &data);
-    float overwrite(const QString &id, const QVariantMap &data);
-    float calcScore(const QVariantMap &data);
-    QStringList getAllRows();
+    Q_INVOKABLE bool clearRow(const QString &id);
+    Q_INVOKABLE bool updateRow(const QString &id, const QVariantMap &data);
+    Q_INVOKABLE QVariantMap completeRowFromId(const QString &id);
+    Q_INVOKABLE QVariantMap completeRowFromDatum(const QVariantMap &data);
+    Q_INVOKABLE QList<IdWithScore> similarRowFromId(const QString &id, uint size);
+    Q_INVOKABLE QList<IdWithScore> similarRowFromDatum(const QVariantMap &data, uint size);
+    Q_INVOKABLE QVariantMap decodeRow(const QString &id);
+    Q_INVOKABLE QStringList getAllRows();
+    Q_INVOKABLE float calcSimilarity(const QVariantMap &data1, const QVariantMap &data2);
+    Q_INVOKABLE float calcL2Norm(const QVariantMap &data);
 
 protected:
     using QJubatusClient::convert;
-    jubatus::anomaly::id_with_score convert(const IdAndScore &data) const;
-    IdAndScore convert(const jubatus::anomaly::id_with_score &data) const;
+    IdWithScore convert(const jubatus::recommender::id_with_score &data) const;
+    QList<IdWithScore> convert(const std::vector<jubatus::recommender::id_with_score> &data) const;
 
 private:
-    jubatus::anomaly::client::anomaly *client();
+    jubatus::recommender::client::recommender *client();
 };
 
-#endif // QJUBATUSANOMALY_H
+#endif // QJUBATUSRECOMMENDER_H

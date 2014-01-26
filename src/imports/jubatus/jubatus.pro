@@ -5,8 +5,14 @@ LIBS += -L$$QT.jubatus.libs
 
 CONFIG += exceptions
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    qmljubatusclassifier.cpp \
+    qmljubatusrecommender.cpp
 
 load(qml_plugin)
 
 OTHER_FILES = plugins.qmltypes qmldir
+
+HEADERS += \
+    qmljubatusclassifier.h \
+    qmljubatusrecommender.h

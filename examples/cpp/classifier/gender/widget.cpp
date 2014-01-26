@@ -37,12 +37,12 @@ static QVariantMap makeDatum(const Ui::Widget *ui)
     return ret;
 }
 
-static QList<QJubatusClassifier::TrainData> makeTrainData(const QString &label, const Ui::Widget *ui)
+static QList<QJubatusClassifier::LabeledDatum> makeTrainData(const QString &label, const Ui::Widget *ui)
 {
-    QList<QJubatusClassifier::TrainData> ret;
-    QJubatusClassifier::TrainData data;
-    data.first = label;
-    data.second = makeDatum(ui);
+    QList<QJubatusClassifier::LabeledDatum> ret;
+    QJubatusClassifier::LabeledDatum data;
+    data.label = label;
+    data.data = makeDatum(ui);
     ret.append(data);
     return ret;
 }
@@ -51,8 +51,10 @@ Widget::Widget(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::Widget)
 {
-    classifier.setTimeout(10.0);
     classifier.setName(QStringLiteral("test"));
+    connect(&classifier, &QJubatusClassifier::error, [this](const QString &message) {
+        QMessageBox::warning(this, tr("Error"), message);
+    });
     ui->setupUi(this);
 
     connect(ui->male, &QPushButton::clicked, [&] {

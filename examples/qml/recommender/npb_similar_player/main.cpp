@@ -1,6 +1,6 @@
 /* Copyright (c) 2012 Silk Project.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -11,7 +11,7 @@
  *     * Neither the name of the Silk nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,49 +24,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef QJUBATUSANOMALY_H
-#define QJUBATUSANOMALY_H
+#include <QtGui/QGuiApplication>
+#include <QtQml/QQmlEngine>
+#include <QtQml/QQmlComponent>
+#include <QtQuick/QQuickItem>
+#include <QtQuick/QQuickView>
 
-#include "jubatus_global.h"
-#include "qjubatusclient.h"
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
 
-#include <QtCore/QVariant>
+    QUrl url = QUrl(QStringLiteral("qrc:/npb_similar_player.qml"));
 
-namespace jubatus {
-    namespace anomaly {
-        struct id_with_score;
-        namespace client {
-            class anomaly;
+    QQmlEngine engine;
+    QObject::connect(&engine, SIGNAL(quit()), &app, SLOT(quit()));
+    QQmlComponent *component = new QQmlComponent(&engine);
+    component->loadUrl(url);
+    QObject *object = component->create();
+    QQuickWindow *window = qobject_cast<QQuickWindow *>(object);
+    QQuickView *view = 0;
+    if (!window) {
+        QQuickItem *item = qobject_cast<QQuickItem *>(object);
+        if (item) {
+            view = new QQuickView(&engine, NULL);
+            window = view;
+            view->setResizeMode(QQuickView::SizeRootObjectToView);
+            view->setContent(url, component, item);
         }
     }
+
+    if (window) {
+        window->show();
+    }
+
+    return app.exec();
 }
-
-class JUBATUS_EXPORT QJubatusAnomaly : public QJubatusClient
-{
-    Q_OBJECT
-public:
-    explicit QJubatusAnomaly(QObject *parent = 0);
-
-    struct IdAndScore {
-        IdAndScore() : score(0.0) {}
-        QString id;
-        float score;
-    };
-
-    bool clearRow(const QString &id);
-    IdAndScore add(const QVariantMap &data);
-    float update(const QString &id, const QVariantMap &data);
-    float overwrite(const QString &id, const QVariantMap &data);
-    float calcScore(const QVariantMap &data);
-    QStringList getAllRows();
-
-protected:
-    using QJubatusClient::convert;
-    jubatus::anomaly::id_with_score convert(const IdAndScore &data) const;
-    IdAndScore convert(const jubatus::anomaly::id_with_score &data) const;
-
-private:
-    jubatus::anomaly::client::anomaly *client();
-};
-
-#endif // QJUBATUSANOMALY_H

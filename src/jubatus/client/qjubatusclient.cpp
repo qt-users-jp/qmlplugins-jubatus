@@ -28,6 +28,7 @@
 
 #include <QtCore/QDebug>
 
+#include <jubatus/client/common/client.hpp>
 #include <jubatus/client/common/datum.hpp>
 
 class QJubatusClient::Private
@@ -52,8 +53,14 @@ QJubatusClient::Private::Private()
 QJubatusClient::QJubatusClient(QObject *parent)
     : QObject(parent)
     , d(new Private())
+    , m_client(0)
 {
     connect(this, &QJubatusClient::destroyed, [this](){ delete d; });
+    auto deleteClient = [this]() { delete m_client; m_client = 0; };
+    connect(this, &QJubatusClient::hostChanged, deleteClient);
+    connect(this, &QJubatusClient::portChanged, deleteClient);
+    connect(this, &QJubatusClient::nameChanged, deleteClient);
+    connect(this, &QJubatusClient::timeoutChanged, deleteClient);
 }
 
 const QString &QJubatusClient::host() const
@@ -104,24 +111,52 @@ void QJubatusClient::setTimeout(double timeout)
     emit timeoutChanged(timeout);
 }
 
+std::string QJubatusClient::convert(const QString &data) const
+{
+    return data.toStdString();
+}
+
+QString QJubatusClient::convert(const std::string &data) const
+{
+    return QString::fromStdString(data);
+}
+
+std::vector<std::string> QJubatusClient::convert(const QStringList &data) const
+{
+    std::vector<std::string> ret;
+    foreach (const QString &str, data) {
+        ret.push_back(convert(str));
+    }
+    return ret;
+}
+
+QStringList QJubatusClient::convert(const std::vector<std::string> &data) const
+{
+    QStringList ret;
+    for (auto it = data.begin(); it != data.end(); ++it) {
+        ret.append(convert(*it));
+    }
+    return ret;
+}
+
 jubatus::client::common::datum QJubatusClient::convert(const QVariantMap &data) const
 {
     jubatus::client::common::datum ret;
 
     foreach (const QString &key, data.keys()) {
         QVariant value = data.value(key);
-        switch (value.type()) {
+        switch (static_cast<int>(value.type())) {
         case QVariant::String:
-            ret.string_values.push_back(make_pair(key.toStdString(), value.toString().toStdString()));
+            ret.add_string(key.toStdString(), value.toString().toStdString());
             break;
         case QVariant::Int:
-            ret.num_values.push_back(make_pair(key.toStdString(), value.toInt()));
+            ret.add_number(key.toStdString(), value.toInt());
             break;
         case QMetaType::Float:
-            ret.num_values.push_back(make_pair(key.toStdString(), value.toFloat()));
+            ret.add_number(key.toStdString(), value.toFloat());
             break;
         case QVariant::Double:
-            ret.num_values.push_back(make_pair(key.toStdString(), value.toDouble()));
+            ret.add_number(key.toStdString(), value.toDouble());
             break;
         default:
             qDebug() << Q_FUNC_INFO << __LINE__ << value.type() << value << "not supported.";
@@ -129,5 +164,34 @@ jubatus::client::common::datum QJubatusClient::convert(const QVariantMap &data) 
         }
     }
 
+    return ret;
+}
+
+QVariantMap QJubatusClient::convert(const jubatus::client::common::datum &data) const
+{
+    QVariantMap ret;
+    for (auto it = data.num_values.begin(); it != data.num_values.end(); ++it) {
+        ret.insert(convert(it->first), it->second);
+    }
+    for (auto it = data.string_values.begin(); it != data.string_values.end(); ++it) {
+        ret.insert(convert(it->first), convert(it->second));
+    }
+    return ret;
+}
+
+std::vector<jubatus::client::common::datum> QJubatusClient::convert(const QList<QVariantMap> &data) const
+{
+    std::vector<jubatus::client::common::datum> ret;
+    foreach (const QVariantMap &datum, data) {
+        ret.push_back(convert(datum));
+    }
+    return ret;
+}
+QList<QVariantMap> QJubatusClient::convert(const std::vector<jubatus::client::common::datum> &data) const
+{
+    QList<QVariantMap> ret;
+    for (auto it = data.begin(); it != data.end(); ++it) {
+        ret.append(convert(*it));
+    }
     return ret;
 }
