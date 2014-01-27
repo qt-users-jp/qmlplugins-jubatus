@@ -1,6 +1,6 @@
 /* Copyright (c) 2012 Silk Project.
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -11,7 +11,7 @@
  *     * Neither the name of the Silk nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,27 +24,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <QtQml/QQmlExtensionPlugin>
-#include <QtQml/qqml.h>
+#ifndef QJUBATUSREGRESSION_H
+#define QJUBATUSREGRESSION_H
 
-#include "qmljubatusclassifier.h"
-#include "qmljubatusrecommender.h"
-#include "qmljubatusregression.h"
+#include "jubatus_global.h"
+#include "qjubatusclient.h"
 
-class QmlJubatusPlugin : public QQmlExtensionPlugin
+#include <QtCore/QVariant>
+
+namespace jubatus {
+    namespace regression {
+        struct scored_datum;
+        namespace client {
+            class regression;
+        }
+    }
+}
+
+class JUBATUS_EXPORT QJubatusRegression : public QJubatusClient
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
-
 public:
-    virtual void registerTypes(const char *uri)
-    {
-        Q_ASSERT(QLatin1String(uri) == QLatin1String("QtJubatus"));
-        // @uri QtJubatus
-        qmlRegisterType<QmlJubatusClassifier>(uri, 0, 1, "Classifier");
-        qmlRegisterType<QmlJubatusRecommender>(uri, 0, 1, "Recommender");
-        qmlRegisterType<QmlJubatusRegression>(uri, 0, 1, "Regression");
-    }
+    explicit QJubatusRegression(QObject *parent = 0);
+
+    struct ScoredDatum {
+        float score;
+        QVariantMap data;
+    };
+
+    Q_INVOKABLE int train(const QList<ScoredDatum> &data);
+    Q_INVOKABLE QList<float> estimate(const QList<QVariantMap> &data);
+
+protected:
+    using QJubatusClient::convert;
+    jubatus::regression::scored_datum convert(const ScoredDatum &data) const;
+    std::vector<jubatus::regression::scored_datum> convert(const QList<ScoredDatum> &data) const;
+    QList<float> convert(const std::vector<float> &data) const;
+
+private:
+    jubatus::regression::client::regression *client();
 };
 
-#include "main.moc"
+#endif // QJUBATUSREGRESSION_H

@@ -97,9 +97,11 @@ private:
 
 #define EXEC_JUBATUS_COMMAND(COMMAND) \
     try { \
+        bool done = false; \
         for (int i = 0; i < 3; i++) { \
             try { \
                 COMMAND; \
+                done = true; \
                 break; \
             } catch (msgpack::rpc::connection_closed_error &e) { \
                 client()->get_client().close(); \
@@ -109,6 +111,9 @@ private:
                 client()->get_client().close(); \
             } \
             ::sleep(1); \
+        } \
+        if (!done) { \
+            COMMAND; \
         } \
     } catch(msgpack::rpc::rpc_error &e) { \
         emit error(QString::fromUtf8(e.what())); \

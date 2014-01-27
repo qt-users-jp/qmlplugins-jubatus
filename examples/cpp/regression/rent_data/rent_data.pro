@@ -1,14 +1,14 @@
 TEMPLATE = app
-TARGET = jubatus-npb-similar-player
+TARGET = jubatus-rent-data
 QT = core network gui widgets jubatus
 CONFIG += c++11
 SOURCES = main.cpp \
     dialog.cpp
 
-OTHER_FILES += npb_similar_player.json
+OTHER_FILES += rent_data.json
 
 RESOURCES += \
-    npb_similar_player.qrc
+    rent_data.qrc
 
 FORMS += \
     dialog.ui

@@ -7,7 +7,8 @@ CONFIG += exceptions
 
 SOURCES += main.cpp \
     qmljubatusclassifier.cpp \
-    qmljubatusrecommender.cpp
+    qmljubatusrecommender.cpp \
+    qmljubatusregression.cpp
 
 load(qml_plugin)
 
@@ -15,4 +16,5 @@ OTHER_FILES = plugins.qmltypes qmldir
 
 HEADERS += \
     qmljubatusclassifier.h \
-    qmljubatusrecommender.h
+    qmljubatusrecommender.h \
+    qmljubatusregression.h
