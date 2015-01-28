@@ -152,6 +152,9 @@ jubatus::client::common::datum QJubatusClient::convert(const QVariantMap &data) 
         case QVariant::Int:
             ret.add_number(key.toStdString(), value.toInt());
             break;
+        case QVariant::UInt:
+            ret.add_number(key.toStdString(), value.toUInt());
+            break;
         case QMetaType::Float:
             ret.add_number(key.toStdString(), value.toFloat());
             break;

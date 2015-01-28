@@ -8,6 +8,7 @@ CONFIG += link_pkgconfig
 PKGCONFIG += jubatus-client
 
 CONFIG += exception
+CONFIG -= create_cmake
 
 DEFINES += JUBATUS_LIBRARY
 HEADERS += \
@@ -18,3 +19,4 @@ include(./anomaly/anomaly.pri)
 include(./classifier/classifier.pri)
 include(./recommender/recommender.pri)
 include(./regression/regression.pri)
+include(./clustering/clustering.pri)
