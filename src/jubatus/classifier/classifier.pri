@@ -1,6 +1,5 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-PUBLIC_HEADERS += $$PWD/qjubatusclassifier.h
-HEADERS += $$PUBLIC_HEADERS
+HEADERS += $$PWD/qjubatusclassifier.h
 SOURCES += $$PWD/qjubatusclassifier.cpp

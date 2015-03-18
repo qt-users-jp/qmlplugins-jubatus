@@ -1,6 +1,5 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-PUBLIC_HEADERS += $$PWD/qjubatusregression.h
-HEADERS += $$PUBLIC_HEADERS
+HEADERS += $$PWD/qjubatusregression.h
 SOURCES += $$PWD/qjubatusregression.cpp

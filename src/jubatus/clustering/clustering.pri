@@ -1,6 +1,5 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-PUBLIC_HEADERS += $$PWD/qjubatusclustering.h
-HEADERS += $$PUBLIC_HEADERS
+HEADERS += $$PWD/qjubatusclustering.h
 SOURCES += $$PWD/qjubatusclustering.cpp

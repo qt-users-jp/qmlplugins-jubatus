@@ -1,6 +1,5 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-PUBLIC_HEADERS += $$PWD/qjubatusrecommender.h
-HEADERS += $$PUBLIC_HEADERS
+HEADERS += $$PWD/qjubatusrecommender.h
 SOURCES += $$PWD/qjubatusrecommender.cpp

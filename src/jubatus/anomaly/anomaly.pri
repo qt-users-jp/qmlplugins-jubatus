@@ -1,6 +1,5 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-PUBLIC_HEADERS += $$PWD/qjubatusanomaly.h
-HEADERS += $$PUBLIC_HEADERS
+HEADERS += $$PWD/qjubatusanomaly.h
 SOURCES += $$PWD/qjubatusanomaly.cpp
