@@ -56,6 +56,9 @@ public:
     const QString &name() const;
     double timeout() const;
 
+    bool save(const QString &id);
+    bool load(const QString &id);
+
 public slots:
     void setHost(const QString &host);
     void setPort(int port);
@@ -96,6 +99,9 @@ private:
 };
 
 #define EXEC_JUBATUS_COMMAND(COMMAND) \
+    EXEC_JUBATUS_COMMAND_PRIVATE(COMMAND, client())
+
+#define EXEC_JUBATUS_COMMAND_PRIVATE(COMMAND, CLIENT) \
     try { \
         bool done = false; \
         for (int i = 0; i < 3; i++) { \
@@ -104,11 +110,11 @@ private:
                 done = true; \
                 break; \
             } catch (msgpack::rpc::connection_closed_error &e) { \
-                client()->get_client().close(); \
+                CLIENT->get_client().close(); \
             } catch (msgpack::rpc::system_error &e) { \
-                client()->get_client().close(); \
+                CLIENT->get_client().close(); \
             } catch (msgpack::rpc::timeout_error &e) { \
-                client()->get_client().close(); \
+                CLIENT->get_client().close(); \
             } \
             ::sleep(1); \
         } \

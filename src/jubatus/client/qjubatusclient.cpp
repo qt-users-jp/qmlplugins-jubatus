@@ -111,6 +111,20 @@ void QJubatusClient::setTimeout(double timeout)
     emit timeoutChanged(timeout);
 }
 
+bool QJubatusClient::save(const QString &id)
+{
+    bool ret = false;
+    EXEC_JUBATUS_COMMAND_PRIVATE( ret = m_client->save(convert(id));, m_client )
+    return ret;
+}
+
+bool QJubatusClient::load(const QString &id)
+{
+    bool ret = false;
+    EXEC_JUBATUS_COMMAND_PRIVATE( ret = m_client->load(convert(id));, m_client )
+    return ret;
+}
+
 std::string QJubatusClient::convert(const QString &data) const
 {
     return data.toStdString();
@@ -149,11 +163,20 @@ jubatus::client::common::datum QJubatusClient::convert(const QVariantMap &data) 
         case QVariant::String:
             ret.add_string(key.toStdString(), value.toString().toStdString());
             break;
+        case QVariant::ByteArray:
+            ret.add_string(key.toStdString(), value.toByteArray().toStdString());
+            break;
         case QVariant::Int:
             ret.add_number(key.toStdString(), value.toInt());
             break;
         case QVariant::UInt:
             ret.add_number(key.toStdString(), value.toUInt());
+            break;
+        case QVariant::LongLong:
+            ret.add_number(key.toStdString(), value.toLongLong());
+            break;
+        case QVariant::ULongLong:
+            ret.add_number(key.toStdString(), value.toULongLong());
             break;
         case QMetaType::Float:
             ret.add_number(key.toStdString(), value.toFloat());
