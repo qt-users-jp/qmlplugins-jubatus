@@ -111,10 +111,10 @@ void QJubatusClient::setTimeout(double timeout)
     emit timeoutChanged(timeout);
 }
 
-bool QJubatusClient::save(const QString &id)
+QHash<QString, QString> QJubatusClient::save(const QString &id)
 {
-    bool ret = false;
-    EXEC_JUBATUS_COMMAND_PRIVATE( ret = m_client->save(convert(id));, m_client )
+    QHash<QString, QString> ret;
+    EXEC_JUBATUS_COMMAND_PRIVATE( ret = convert(m_client->save(convert(id)));, m_client )
     return ret;
 }
 
@@ -218,6 +218,25 @@ QList<QVariantMap> QJubatusClient::convert(const std::vector<jubatus::client::co
     QList<QVariantMap> ret;
     for (auto it = data.begin(); it != data.end(); ++it) {
         ret.append(convert(*it));
+    }
+    return ret;
+}
+
+std::map<std::string, std::string> QJubatusClient::convert(const QHash<QString, QString> &data) const
+{
+    std::map<std::string, std::string> ret;
+    QHashIterator<QString, QString> i(data);
+    while (i.hasNext()) {
+        ret[convert(i.key())] = convert(i.value());
+    }
+    return ret;
+}
+
+QHash<QString, QString> QJubatusClient::convert(const std::map<std::string, std::string> &data) const
+{
+    QHash<QString, QString> ret;
+    for(const auto itr : data) {
+        ret.insert(convert(itr.first), convert(itr.second));
     }
     return ret;
 }

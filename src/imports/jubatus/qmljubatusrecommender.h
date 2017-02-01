@@ -7,7 +7,7 @@ class QmlJubatusRecommender : public QJubatusRecommender
 {
     Q_OBJECT
 public:
-    explicit QmlJubatusRecommender(QObject *parent = 0);
+    explicit QmlJubatusRecommender(QObject *parent = nullptr);
 
     Q_INVOKABLE QVariantList similarRowFromId(const QString &id, uint size);
     Q_INVOKABLE QVariantList similarRowFromDatum(const QVariantMap &data, uint size);

@@ -17,3 +17,6 @@ include(qtquick2controlsapplicationviewer/qtquick2controlsapplicationviewer.pri)
 qtcAddDeployment()
 
 OTHER_FILES += iris.json
+
+target.path = $$[QT_INSTALL_EXAMPLES]/jubatus/qml/regression/iris
+INSTALLS += target

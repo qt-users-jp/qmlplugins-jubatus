@@ -47,7 +47,7 @@ class JUBATUS_EXPORT QJubatusClassifier : public QJubatusClient
 {
     Q_OBJECT
 public:
-    explicit QJubatusClassifier(QObject *parent = 0);
+    explicit QJubatusClassifier(QObject *parent = nullptr);
 
     struct LabeledDatum {
         QString label;

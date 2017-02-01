@@ -35,7 +35,7 @@ QJubatusClustering::QJubatusClustering(QObject *parent)
 {
 }
 
-bool QJubatusClustering::push(const QList<QVariantMap> &data)
+bool QJubatusClustering::push(const QList<IndexedPoint> &data)
 {
     bool ret = false;
     EXEC_JUBATUS_COMMAND( ret = client()->push(convert(data)); )
@@ -93,11 +93,29 @@ QList<QJubatusClustering::WeightedDatum> QJubatusClustering::convert(const std::
     }
     return ret;
 }
+
 QList<QList<QJubatusClustering::WeightedDatum> > QJubatusClustering::convert(const std::vector<std::vector<jubatus::clustering::weighted_datum> > &data) const
 {
     QList<QList<QJubatusClustering::WeightedDatum> > ret;
     for (auto it = data.begin(); it != data.end(); ++it) {
         ret.append(convert(*it));
+    }
+    return ret;
+}
+
+jubatus::clustering::indexed_point QJubatusClustering::convert(const QJubatusClustering::IndexedPoint &data) const
+{
+    jubatus::clustering::indexed_point ret;
+    ret.id = convert(data.id);
+    ret.point = convert(data.point);
+    return ret;
+}
+
+std::vector<jubatus::clustering::indexed_point> QJubatusClustering::convert(const QList<QJubatusClustering::IndexedPoint> &data) const
+{
+    std::vector<jubatus::clustering::indexed_point> ret;
+    foreach (const IndexedPoint &indexPoint, data) {
+        ret.push_back(convert(indexPoint));
     }
     return ret;
 }

@@ -14,3 +14,6 @@ FORMS += \
     widget.ui
 
 OTHER_FILES += gender.json
+
+target.path = $$[QT_INSTALL_EXAMPLES]/jubatus/cpp/classifier/gender
+INSTALLS += target

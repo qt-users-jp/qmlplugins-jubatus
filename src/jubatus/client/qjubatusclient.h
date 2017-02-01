@@ -49,23 +49,23 @@ class JUBATUS_EXPORT QJubatusClient : public QObject
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(double timeout READ timeout WRITE setTimeout NOTIFY timeoutChanged)
 public:
-    explicit QJubatusClient(QObject *parent = 0);
+    explicit QJubatusClient(QObject *parent = nullptr);
 
     const QString &host() const;
     int port() const;
     const QString &name() const;
     double timeout() const;
 
-    bool save(const QString &id);
+    QHash<QString, QString> save(const QString &id);
     bool load(const QString &id);
 
-public slots:
+public Q_SLOTS:
     void setHost(const QString &host);
     void setPort(int port);
     void setName(const QString &name);
     void setTimeout(double timeout);
 
-signals:
+Q_SIGNALS:
     void hostChanged(const QString &host);
     void portChanged(int port);
     void nameChanged(const QString &name);
@@ -90,6 +90,8 @@ protected:
     QVariantMap convert(const jubatus::client::common::datum &data) const;
     std::vector<jubatus::client::common::datum> convert(const QList<QVariantMap> &data) const;
     QList<QVariantMap> convert(const std::vector<jubatus::client::common::datum> &data) const;
+    std::map<std::string, std::string> convert(const QHash<QString, QString> &data) const;
+    QHash<QString, QString> convert(const std::map<std::string, std::string> &data) const;
 
 private:
     class Private;

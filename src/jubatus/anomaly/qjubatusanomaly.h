@@ -45,7 +45,7 @@ class JUBATUS_EXPORT QJubatusAnomaly : public QJubatusClient
 {
     Q_OBJECT
 public:
-    explicit QJubatusAnomaly(QObject *parent = 0);
+    explicit QJubatusAnomaly(QObject *parent = nullptr);
 
     struct IdAndScore {
         IdAndScore() : score(0.0) {}

@@ -45,7 +45,7 @@ class JUBATUS_EXPORT QJubatusRecommender : public QJubatusClient
 {
     Q_OBJECT
 public:
-    explicit QJubatusRecommender(QObject *parent = 0);
+    explicit QJubatusRecommender(QObject *parent = nullptr);
 
     struct IdWithScore {
         QString id;

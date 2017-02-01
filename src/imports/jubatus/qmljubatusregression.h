@@ -7,7 +7,7 @@ class QmlJubatusRegression : public QJubatusRegression
 {
     Q_OBJECT
 public:
-    explicit QmlJubatusRegression(QObject *parent = 0);
+    explicit QmlJubatusRegression(QObject *parent = nullptr);
 
     Q_INVOKABLE bool train(const QVariantMap &data, float score);
     Q_INVOKABLE float estimate(const QVariantMap &data);

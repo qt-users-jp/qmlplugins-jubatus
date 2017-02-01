@@ -45,7 +45,7 @@ class JUBATUS_EXPORT QJubatusRegression : public QJubatusClient
 {
     Q_OBJECT
 public:
-    explicit QJubatusRegression(QObject *parent = 0);
+    explicit QJubatusRegression(QObject *parent = nullptr);
 
     struct ScoredDatum {
         float score;

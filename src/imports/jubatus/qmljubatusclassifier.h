@@ -7,7 +7,7 @@ class QmlJubatusClassifier : public QJubatusClassifier
 {
     Q_OBJECT
 public:
-    QmlJubatusClassifier(QObject *parent = 0);
+    QmlJubatusClassifier(QObject *parent = nullptr);
 
     Q_INVOKABLE void train(const QString &label, const QVariantMap &data);
     Q_INVOKABLE QVariantList classify(const QVariantMap &data);

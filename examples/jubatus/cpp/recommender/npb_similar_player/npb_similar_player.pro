@@ -15,3 +15,6 @@ FORMS += \
 
 HEADERS += \
     dialog.h
+
+target.path = $$[QT_INSTALL_EXAMPLES]/jubatus/cpp/recommender/npb_similar_player
+INSTALLS += target

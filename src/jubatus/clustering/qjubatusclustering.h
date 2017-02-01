@@ -35,6 +35,7 @@
 namespace jubatus {
     namespace clustering {
         struct weighted_datum;
+        struct indexed_point;
         namespace client {
             class clustering;
         }
@@ -45,14 +46,19 @@ class JUBATUS_EXPORT QJubatusClustering : public QJubatusClient
 {
     Q_OBJECT
 public:
-    explicit QJubatusClustering(QObject *parent = 0);
+    explicit QJubatusClustering(QObject *parent = nullptr);
 
     struct WeightedDatum {
         double weight;
         QVariantMap point;
     };
 
-    Q_INVOKABLE bool push(const QList<QVariantMap> &data);
+    struct IndexedPoint {
+        QString id;
+        QVariantMap point;
+    };
+
+    Q_INVOKABLE bool push(const QList<IndexedPoint> &data);
     Q_INVOKABLE uint getRevision();
     Q_INVOKABLE QList<QList<QJubatusClustering::WeightedDatum> > getCoreMembers();
     Q_INVOKABLE QList<QVariantMap> getKCenter();
@@ -64,6 +70,8 @@ protected:
     QJubatusClustering::WeightedDatum convert(const jubatus::clustering::weighted_datum &data) const;
     QList<QJubatusClustering::WeightedDatum> convert(const std::vector<jubatus::clustering::weighted_datum> &data) const;
     QList<QList<QJubatusClustering::WeightedDatum> > convert(const std::vector<std::vector<jubatus::clustering::weighted_datum> > &data) const;
+    jubatus::clustering::indexed_point convert(const QJubatusClustering::IndexedPoint &data) const;
+    std::vector<jubatus::clustering::indexed_point> convert(const QList<QJubatusClustering::IndexedPoint> &data) const;
 
 private:
     jubatus::clustering::client::clustering *client();
