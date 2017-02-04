@@ -16,6 +16,7 @@ HEADERS += \
 
 include(./client/client.pri)
 include(./anomaly/anomaly.pri)
+include(./burst/burst.pri)
 include(./classifier/classifier.pri)
 include(./recommender/recommender.pri)
 include(./regression/regression.pri)

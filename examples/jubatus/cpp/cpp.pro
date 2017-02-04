@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS += anomaly classifier recommender regression
+SUBDIRS += anomaly burst classifier recommender regression

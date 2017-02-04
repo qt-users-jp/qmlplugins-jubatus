@@ -235,7 +235,7 @@ std::map<std::string, std::string> QJubatusClient::convert(const QHash<QString, 
 QHash<QString, QString> QJubatusClient::convert(const std::map<std::string, std::string> &data) const
 {
     QHash<QString, QString> ret;
-    for(const auto itr : data) {
+    for(const auto &itr : data) {
         ret.insert(convert(itr.first), convert(itr.second));
     }
     return ret;
