@@ -88,7 +88,7 @@ int main(int argc, char **argv)
         QString id = QString::number(i++);
         QVariantMap data;
         data.insert("title", fields.at(0));
-//        data.insert("abstract", fields.at(5));
+        data.insert("abstract", fields.at(5));
         nn.setRow(id, data);
     }
 
